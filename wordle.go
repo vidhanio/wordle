@@ -42,7 +42,6 @@ func New(wordLength, guessesAllowed int, dictionary, common []string) (*Wordle, 
 	}
 
 	for _, word := range dictionary {
-
 		word = strings.ToLower(word)
 		newWord := make([]rune, 0)
 		for _, c := range word {
@@ -58,10 +57,6 @@ func New(wordLength, guessesAllowed int, dictionary, common []string) (*Wordle, 
 
 	cleanedCommon := make([]string, 0)
 	for _, word := range common {
-		if len(word) != wordLength {
-			continue
-		}
-
 		word = strings.ToLower(word)
 		newWord := make([]rune, 0)
 		for _, c := range word {
