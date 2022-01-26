@@ -42,19 +42,18 @@ func New(wordLength, guessesAllowed int, dictionary, common []string) (*Wordle, 
 	}
 
 	for _, word := range dictionary {
-		if len(word) != wordLength {
-			continue
-		}
 
 		word = strings.ToLower(word)
 		newWord := make([]rune, 0)
 		for _, c := range word {
-			if isLetter(c) {
+			if isLowercase(c) {
 				newWord = append(newWord, c)
 			}
 		}
 
-		w.dictionary[string(newWord)] = void{}
+		if len(newWord) == wordLength {
+			w.dictionary[string(newWord)] = void{}
+		}
 	}
 
 	cleanedCommon := make([]string, 0)
@@ -66,11 +65,15 @@ func New(wordLength, guessesAllowed int, dictionary, common []string) (*Wordle, 
 		word = strings.ToLower(word)
 		newWord := make([]rune, 0)
 		for _, c := range word {
-			if isLetter(c) {
+			if isLowercase(c) {
 				newWord = append(newWord, c)
 			}
 		}
-		cleanedCommon = append(cleanedCommon, string(newWord))
+
+		if len(newWord) == wordLength {
+			cleanedCommon = append(cleanedCommon, string(newWord))
+			w.dictionary[string(newWord)] = void{}
+		}
 	}
 
 	if len(cleanedCommon) == 0 {
