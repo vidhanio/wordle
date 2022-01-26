@@ -1,4 +1,4 @@
-# Wordle
+# wordle
 
 A simple wordle package in Go.
 
