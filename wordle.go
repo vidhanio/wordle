@@ -20,8 +20,7 @@ type void struct{}
 type Wordle struct {
 	word []rune // Correct word
 
-	commonWords map[string]void // Common words to use as correct words
-	validWords  map[string]void // All valid words
+	dictionary map[string]void // All valid words
 
 	guessesAllowed int           // Number of guesses allowed
 	wordLength     int           // Length of word
@@ -31,44 +30,60 @@ type Wordle struct {
 	cancelled bool
 }
 
-func New(wordLength, guessesAllowed int, commonWords, validWords []string) (*Wordle, error) {
+func New(wordLength, guessesAllowed int, dictionary, common []string) (*Wordle, error) {
 	r := rand.New(rand.NewSource(time.Now().Unix()))
-
-	// Get random word with the given length
-
-	randomWord := make([]rune, wordLength)
-	wordsWithLength := make([][]rune, 0)
-
-	for _, w := range commonWords {
-		if len(w) == wordLength {
-			wordsWithLength = append(wordsWithLength, []rune(w))
-		}
-	}
-
-	if len(wordsWithLength) == 0 {
-		return nil, fmt.Errorf("invalid word length: no words with length %d in common words", wordLength)
-	}
-
-	randomWord = wordsWithLength[r.Intn(len(wordsWithLength))]
 
 	// Initialize Wordle
 	w := &Wordle{
-		word:           randomWord,
-		validWords:     make(map[string]void, len(validWords)),
+		dictionary:     make(map[string]void),
 		guessesAllowed: guessesAllowed,
 		wordLength:     wordLength,
 		guesses:        make([][]rune, 0),
 	}
 
-	// Convert valid words to runes
-	for _, word := range validWords {
-		w.validWords[word] = void{}
+	for _, word := range dictionary {
+		if len(word) != wordLength {
+			continue
+		}
+
+		word = strings.ToLower(word)
+		newWord := make([]rune, 0)
+		for _, c := range word {
+			if isLetter(c) {
+				newWord = append(newWord, c)
+			}
+		}
+
+		w.dictionary[string(newWord)] = void{}
 	}
+
+	cleanedCommon := make([]string, 0)
+	for _, word := range common {
+		if len(word) != wordLength {
+			continue
+		}
+
+		word = strings.ToLower(word)
+		newWord := make([]rune, 0)
+		for _, c := range word {
+			if isLetter(c) {
+				newWord = append(newWord, c)
+			}
+		}
+		cleanedCommon = append(cleanedCommon, string(newWord))
+	}
+
+	if len(cleanedCommon) == 0 {
+		return nil, fmt.Errorf("invalid word length: no words with length %d in common words", wordLength)
+	}
+
+	randWord := cleanedCommon[r.Intn(len(cleanedCommon))]
+
+	w.word = []rune(randWord)
 
 	return w, nil
 }
 
-// Guess a word
 func (w *Wordle) Guess(guess string) ([]GuessType, error) {
 	if w.Done() {
 		return nil, fmt.Errorf("game is done")
@@ -81,7 +96,7 @@ func (w *Wordle) Guess(guess string) ([]GuessType, error) {
 		return nil, fmt.Errorf("invalid word length: wanted %d, got %d", w.wordLength, len(guessRunes))
 	}
 
-	if _, ok := w.validWords[guess]; !ok {
+	if _, ok := w.dictionary[guess]; !ok {
 		return nil, fmt.Errorf("invalid word: %s was not found in the dictionary", guess)
 	}
 
