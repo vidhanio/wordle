@@ -34,6 +34,6 @@ func contains[T comparable](s []T, e T) bool {
 	return false
 }
 
-func isLowercase(c rune) bool {
-	return c >= 'a' && c <= 'z'
+func isLowercaseLetter(c rune) bool {
+	return 'a' <= c && c <= 'z'
 }

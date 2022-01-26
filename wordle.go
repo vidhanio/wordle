@@ -45,7 +45,7 @@ func New(wordLength, guessesAllowed int, dictionary, common []string) (*Wordle, 
 		word = strings.ToLower(word)
 		newWord := make([]rune, 0)
 		for _, c := range word {
-			if isLowercase(c) {
+			if isLowercaseLetter(c) {
 				newWord = append(newWord, c)
 			}
 		}
@@ -60,7 +60,7 @@ func New(wordLength, guessesAllowed int, dictionary, common []string) (*Wordle, 
 		word = strings.ToLower(word)
 		newWord := make([]rune, 0)
 		for _, c := range word {
-			if isLowercase(c) {
+			if isLowercaseLetter(c) {
 				newWord = append(newWord, c)
 			}
 		}
