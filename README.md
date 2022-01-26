@@ -20,16 +20,16 @@ import (
 func main() {
 	// words which can be used as the word in the wordle
 	// this is because some valid words are near-impossible to guess, although they are valid words
-	commonWords := []string{"hello", "among"}
+	common := []string{"hello", "among"}
 
 	// all words which are valid
-	validWords := []string{"hello", "world", "among", "us", "sus", "tasks"}
+	dictionary := []string{"hello", "world", "among", "us", "sus", "tasks"}
 
 	// Create a new wordle with:
 	// - A word length of 5
 	// - A guess count of 6
 	// with the validWords and commonWords
-	w, err := wordle.New(5, 6, commonWords, validWords)
+	w, err := wordle.New(5, 6, common, dictionary)
 	if err != nil {
 		panic(err)
 	}
