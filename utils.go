@@ -24,6 +24,16 @@ func containsSlice[T comparable](s [][]T, e []T) bool {
 	return false
 }
 
+func contains[T comparable](s []T, e T) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+
+	return false
+}
+
 func isLowercaseLetter(c rune) bool {
 	return 'a' <= c && c <= 'z'
 }

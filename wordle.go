@@ -102,12 +102,16 @@ func (w *Wordle) Guess(guess string) ([]GuessType, error) {
 
 	charCountMap := [26]int{}
 
+	for _, c := range w.word {
+		if contains(guessRunes, c) {
+			charCountMap[c-'a']++
+		}
+	}
+
 	for i, g := range guessRunes {
 		if g < 'a' || g > 'z' {
 			return nil, fmt.Errorf("invalid word: %c is not a letter", g)
 		}
-
-		charCountMap[g-'a']++
 
 		if g == w.word[i] {
 			guessTypes[i] = GuessTypeCorrect
