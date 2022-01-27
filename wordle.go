@@ -98,7 +98,7 @@ func (w *Wordle) Guess(guess string) ([]GuessType, error) {
 		return nil, fmt.Errorf("invalid word: %s was not found in the dictionary", guess)
 	}
 
-	charGuesses := make([]GuessType, w.wordLength)
+	guessTypes := make([]GuessType, w.wordLength)
 
 	charCountMap := [26]int{}
 
@@ -112,24 +112,24 @@ func (w *Wordle) Guess(guess string) ([]GuessType, error) {
 
 	for i, g := range guessRunes {
 		if g == w.word[i] {
-			charGuesses[i] = GuessTypeCorrect
+			guessTypes[i] = GuessTypeCorrect
 			charCountMap[g-'a']--
 		} else {
-			charGuesses[i] = GuessTypeWrong
+			guessTypes[i] = GuessTypeWrong
 		}
 	}
 
 	for i, g := range guessRunes {
-		if charCountMap[g-'a'] > 0 && charGuesses[i] == GuessTypeWrong {
-			charGuesses[i] = GuessTypeWrongPosition
+		if charCountMap[g-'a'] > 0 && guessTypes[i] == GuessTypeWrong {
+			guessTypes[i] = GuessTypeWrongPosition
 			charCountMap[g-'a']--
 		}
 	}
 
 	w.guesses = append(w.guesses, guessRunes)
-	w.guessTypes = append(w.guessTypes, charGuesses)
+	w.guessTypes = append(w.guessTypes, guessTypes)
 
-	return charGuesses, nil
+	return guessTypes, nil
 }
 
 func (w *Wordle) Word() string {
