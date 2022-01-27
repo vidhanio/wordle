@@ -1,6 +1,6 @@
 package wordle
 
-func equal[T comparable](s1 []T, s2 []T) bool {
+func equalsSlice[T comparable](s1 []T, s2 []T) bool {
 	if len(s1) != len(s2) {
 		return false
 	}
@@ -16,17 +16,7 @@ func equal[T comparable](s1 []T, s2 []T) bool {
 
 func containsSlice[T comparable](s [][]T, e []T) bool {
 	for _, a := range s {
-		if equal(a, e) {
-			return true
-		}
-	}
-
-	return false
-}
-
-func contains[T comparable](s []T, e T) bool {
-	for _, a := range s {
-		if a == e {
+		if equalsSlice(a, e) {
 			return true
 		}
 	}

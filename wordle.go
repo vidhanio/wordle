@@ -100,17 +100,29 @@ func (w *Wordle) Guess(guess string) ([]GuessType, error) {
 
 	charGuesses := make([]GuessType, w.wordLength)
 
-	for i, g := range guessRunes {
+	charCountMap := [26]int{}
+
+	for _, g := range guessRunes {
 		if g < 'a' || g > 'z' {
 			return nil, fmt.Errorf("invalid word: %c is not a letter", g)
 		}
 
+		charCountMap[g-'a']++
+	}
+
+	for i, g := range guessRunes {
 		if g == w.word[i] {
 			charGuesses[i] = GuessTypeCorrect
-		} else if contains(w.word, g) {
-			charGuesses[i] = GuessTypeWrongPosition
+			charCountMap[g-'a']--
 		} else {
 			charGuesses[i] = GuessTypeWrong
+		}
+	}
+
+	for i, g := range guessRunes {
+		if charCountMap[g-'a'] > 0 && charGuesses[i] == GuessTypeWrong {
+			charGuesses[i] = GuessTypeWrongPosition
+			charCountMap[g-'a']--
 		}
 	}
 
@@ -163,7 +175,7 @@ func (w *Wordle) Won() bool {
 		return false
 	}
 
-	return equal(w.guesses[len(w.guesses)-1], w.word)
+	return equalsSlice(w.guesses[len(w.guesses)-1], w.word)
 }
 
 func (w *Wordle) Lost() bool {
