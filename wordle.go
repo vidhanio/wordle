@@ -7,12 +7,12 @@ import (
 	"time"
 )
 
-type GuessType int
+type GuessResult int
 
 const (
-	GuessTypeCorrect GuessType = iota
-	GuessTypeWrongPosition
-	GuessTypeWrong
+	GuessResultCorrect GuessResult = iota
+	GuessResultWrongPosition
+	GuessResultWrong
 )
 
 type void struct{}
@@ -22,10 +22,12 @@ type Wordle struct {
 
 	dictionary map[string]void // All valid words
 
-	guessesAllowed int           // Number of guesses allowed
-	wordLength     int           // Length of word
-	guesses        [][]rune      // Guesses
-	guessTypes     [][]GuessType // Character guesses
+	guessesAllowed int             // Number of guesses allowed
+	wordLength     int             // Length of word
+	guesses        [][]rune        // Guesses
+	guessResults   [][]GuessResult // Character guesses
+
+	letters [26]GuessResult
 
 	cancelled bool
 }
@@ -82,7 +84,7 @@ func New(wordLength, guessesAllowed int, dictionary, common []string) (*Wordle, 
 	return w, nil
 }
 
-func (w *Wordle) Guess(guess string) ([]GuessType, error) {
+func (w *Wordle) Guess(guess string) ([]GuessResult, error) {
 	if w.Done() {
 		return nil, fmt.Errorf("game is done")
 	}
@@ -98,7 +100,7 @@ func (w *Wordle) Guess(guess string) ([]GuessType, error) {
 		return nil, fmt.Errorf("invalid word: %s was not found in the dictionary", guess)
 	}
 
-	guessTypes := make([]GuessType, w.wordLength)
+	guessResults := make([]GuessResult, w.wordLength)
 
 	charCounts := [26]int{}
 
@@ -114,24 +116,28 @@ func (w *Wordle) Guess(guess string) ([]GuessType, error) {
 		}
 
 		if g == w.word[i] {
-			guessTypes[i] = GuessTypeCorrect
+			guessResults[i] = GuessResultCorrect
 			charCounts[g-'a']--
 		} else {
-			guessTypes[i] = GuessTypeWrong
+			guessResults[i] = GuessResultWrong
 		}
 	}
 
 	for i, g := range guessRunes {
-		if charCounts[g-'a'] > 0 && guessTypes[i] == GuessTypeWrong {
-			guessTypes[i] = GuessTypeWrongPosition
+		if charCounts[g-'a'] > 0 && guessResults[i] == GuessResultWrong {
+			guessResults[i] = GuessResultWrongPosition
 			charCounts[g-'a']--
 		}
 	}
 
 	w.guesses = append(w.guesses, guessRunes)
-	w.guessTypes = append(w.guessTypes, guessTypes)
+	w.guessResults = append(w.guessResults, guessResults)
 
-	return guessTypes, nil
+	for i, g := range guessRunes {
+		w.letters[g-'a'] = guessResults[i]
+	}
+
+	return guessResults, nil
 }
 
 func (w *Wordle) Word() string {
@@ -156,12 +162,16 @@ func (w *Wordle) Guesses() []string {
 	return guesses
 }
 
-func (w *Wordle) GuessTypes() [][]GuessType {
-	return w.guessTypes
+func (w *Wordle) GuessResults() [][]GuessResult {
+	return w.guessResults
 }
 
 func (w *Wordle) GuessesLeft() int {
 	return w.guessesAllowed - len(w.guesses)
+}
+
+func (w *Wordle) Letters() [26]GuessResult {
+	return w.letters
 }
 
 func (w *Wordle) Cancel() {
