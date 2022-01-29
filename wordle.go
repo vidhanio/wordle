@@ -10,9 +10,10 @@ import (
 type GuessResult int
 
 const (
-	GuessResultCorrect GuessResult = iota
-	GuessResultWrongPosition
+	GuessResultNotGuessed GuessResult = iota
 	GuessResultWrong
+	GuessResultWrongPosition
+	GuessResultCorrect
 )
 
 type void struct{}
@@ -27,7 +28,7 @@ type Wordle struct {
 	guesses        [][]rune        // Guesses
 	guessResults   [][]GuessResult // Character guesses
 
-	letters [26]GuessResult
+	letters [26]GuessResult // Letters guessed
 
 	cancelled bool
 }
@@ -41,6 +42,7 @@ func New(wordLength, guessesAllowed int, dictionary, common []string) (*Wordle, 
 		guessesAllowed: guessesAllowed,
 		wordLength:     wordLength,
 		guesses:        make([][]rune, 0),
+		guessResults:   make([][]GuessResult, 0),
 	}
 
 	for _, word := range dictionary {
@@ -118,8 +120,16 @@ func (w *Wordle) Guess(guess string) ([]GuessResult, error) {
 		if g == w.word[i] {
 			guessResults[i] = GuessResultCorrect
 			charCounts[g-'a']--
+
+			if w.letters[g-'a'] < GuessResultCorrect {
+				w.letters[g-'a'] = GuessResultCorrect
+			}
 		} else {
 			guessResults[i] = GuessResultWrong
+
+			if w.letters[g-'a'] < GuessResultWrong {
+				w.letters[g-'a'] = GuessResultWrong
+			}
 		}
 	}
 
@@ -127,15 +137,15 @@ func (w *Wordle) Guess(guess string) ([]GuessResult, error) {
 		if charCounts[g-'a'] > 0 && guessResults[i] == GuessResultWrong {
 			guessResults[i] = GuessResultWrongPosition
 			charCounts[g-'a']--
+
+			if w.letters[g-'a'] < GuessResultWrongPosition {
+				w.letters[g-'a'] = GuessResultWrongPosition
+			}
 		}
 	}
 
 	w.guesses = append(w.guesses, guessRunes)
 	w.guessResults = append(w.guessResults, guessResults)
-
-	for i, g := range guessRunes {
-		w.letters[g-'a'] = guessResults[i]
-	}
 
 	return guessResults, nil
 }
